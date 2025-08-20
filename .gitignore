@@ -1,0 +1,86 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.a
+
+# Compiled executable (comment out if you want to commit releases)
+bin/mm.exe
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# IDE and Editor files
+.vscode/
+.vs/
+*.swp
+*.swo
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows specific
+desktop.ini
+
+# WSL/Linux backup files
+*~
+
+# Log files
+*.log
+
+# Debug files
+*.pdb
+*.ilk
+
+# Package files
+*.zip
+*.tar.gz
+*.7z
+
+# Node.js (if any scripts use it)
+node_modules/
+npm-debug.log*
+
+# Python cache (for scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Test coverage
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# CMake (backup)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.bak
+
+# Backup files
+*.bak
+*.orig
+*.backup
+
+# Documentation build
+docs/_build/
+site/
+
+# Local environment files
+.env
+.env.local
