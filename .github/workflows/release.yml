@@ -1,0 +1,122 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Matches v0.9.1, v1.0.0, etc.
+
+permissions:
+  contents: write  # Required to create releases
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}  # Remove "refs/tags/v" prefix
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        
+        # Split version into components (e.g., "1.2.3" -> MAJOR=1, MINOR=2, PATCH=3)
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+        
+        # Handle versions with suffixes (e.g., "1.2.3-beta" -> "1.2.3")
+        PATCH=$(echo "$PATCH" | sed 's/[^0-9].*//')
+        
+        echo "VERSION_MAJOR=${MAJOR:-0}" >> $GITHUB_OUTPUT
+        echo "VERSION_MINOR=${MINOR:-0}" >> $GITHUB_OUTPUT
+        echo "VERSION_PATCH=${PATCH:-0}" >> $GITHUB_OUTPUT
+        
+        echo "Extracted version: $MAJOR.$MINOR.$PATCH from tag $VERSION"
+      
+    - name: Install MinGW-w64 cross-compiler
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
+        
+    - name: Build release
+      run: |
+        make clean
+        make all VERSION_DEFINES="-DVERSION_MAJOR=${{ steps.version.outputs.VERSION_MAJOR }} -DVERSION_MINOR=${{ steps.version.outputs.VERSION_MINOR }} -DVERSION_PATCH=${{ steps.version.outputs.VERSION_PATCH }}"
+        
+    - name: Verify release build
+      run: |
+        ls -la bin/
+        file bin/mm.exe
+        echo "Executable size: $(stat -c%s bin/mm.exe) bytes"
+        
+    - name: Create release archive
+      run: |
+        mkdir -p release
+        cp bin/mm.exe release/
+        cp README.md release/
+        cp assets/mouse-animal.ico release/
+        cd release
+        zip -r ../mm-${{ steps.version.outputs.VERSION }}.zip .
+        cd ..
+        
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        cat > release_notes.md << 'EOF'
+        ## Mouse Mover ${{ steps.version.outputs.VERSION }}
+        
+        Lightweight C++ Windows application that prevents screen lock by automatically moving the mouse cursor.
+        
+        ### 🚀 Features
+        - **Native Windows application** with system tray integration
+        - **Minimal memory usage** (~1-2MB vs ~100MB+ Java alternatives)
+        - **No dependencies** - single standalone executable
+        - **Smart movement** with user activity detection
+        - **Configurable parameters** via command line
+        
+        ### 📦 What's included
+        - `mm.exe` - Main executable (2.3MB)
+        - `README.md` - Documentation and usage guide
+        - `mouse-animal.ico` - Application icon (optional)
+        
+        ### 🔧 Installation
+        1. Download `mm.exe` from the assets below
+        2. Run the executable - it will appear in your system tray
+        3. Right-click the tray icon for options (Pause/Resume/Autostart/Exit)
+        
+        ### 💡 Inspiration
+        Inspired by [domax/mouse-mover](https://github.com/domax/mouse-mover) but reimplemented in C++ for better performance and user experience.
+        
+        ### ⚙️ System Requirements
+        - Windows 10 or Windows 11
+        - x64 architecture
+        - No additional software required
+        
+        ---
+        **Built with WSL cross-compilation using MinGW-w64**
+        EOF
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Mouse Mover ${{ steps.version.outputs.VERSION }}
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        body_path: release_notes.md
+        files: |
+          bin/mm.exe
+          mm-${{ steps.version.outputs.VERSION }}.zip
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.VERSION, 'alpha') || contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-${{ steps.version.outputs.VERSION }}
+        path: |
+          bin/mm.exe
+          mm-${{ steps.version.outputs.VERSION }}.zip
+          release_notes.md
+        retention-days: 90

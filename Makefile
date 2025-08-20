@@ -21,6 +21,14 @@ WINDRES = x86_64-w64-mingw32-windres
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -mwindows
 LDFLAGS = -lgdi32 -luser32 -lshell32 -ladvapi32 -static-libgcc -static-libstdc++
 
+# Version defines (can be overridden from command line)
+# Example: make VERSION_DEFINES="-DVERSION_MAJOR=1 -DVERSION_MINOR=2 -DVERSION_PATCH=3"
+VERSION_DEFINES ?= 
+
+# Add version defines to compiler flags
+CXXFLAGS += $(VERSION_DEFINES)
+WINDRES_FLAGS = $(VERSION_DEFINES)
+
 # Source files
 SOURCES = $(SRC_DIR)/main.cpp
 RC_FILE = $(SRC_DIR)/resource.rc
@@ -42,7 +50,7 @@ $(BIN_DIR):
 
 # Compile resources
 $(RC_OBJ): $(RC_FILE) $(ICON_FILE) | $(BUILD_DIR)
-	$(WINDRES) $(RC_FILE) -o $(RC_OBJ)
+	$(WINDRES) $(WINDRES_FLAGS) $(RC_FILE) -o $(RC_OBJ)
 
 # Build main executable
 $(TARGET): $(SOURCES) $(RC_OBJ) | $(BIN_DIR)
