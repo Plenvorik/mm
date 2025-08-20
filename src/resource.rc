@@ -4,10 +4,28 @@
 // Icon resource
 IDI_MAIN_ICON ICON "../assets/mouse-animal.ico"
 
+// Macro to convert numbers to strings
+#define STRINGIZE2(x) #x
+#define STRINGIZE(x) STRINGIZE2(x)
+
+// Version defines with fallback defaults
+#ifndef VERSION_MAJOR
+#define VERSION_MAJOR 1
+#endif
+#ifndef VERSION_MINOR
+#define VERSION_MINOR 0
+#endif
+#ifndef VERSION_PATCH
+#define VERSION_PATCH 0
+#endif
+#ifndef VERSION_BUILD
+#define VERSION_BUILD 0
+#endif
+
 // Version information
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 1,0,0,0
-PRODUCTVERSION 1,0,0,0
+FILEVERSION VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH,VERSION_BUILD
+PRODUCTVERSION VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH,VERSION_BUILD
 FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 FILEFLAGS 0x0L
 FILEOS VOS_NT_WINDOWS32
@@ -20,12 +38,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Open Source"
             VALUE "FileDescription", "Mouse Mover - Prevents screen lock"
-            VALUE "FileVersion", "1.0.0.0"
+            VALUE "FileVersion", STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH) ".0"
             VALUE "InternalName", "mm.exe"
             VALUE "LegalCopyright", "MIT License"
             VALUE "OriginalFilename", "mm.exe"
             VALUE "ProductName", "Mouse Mover"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "ProductVersion", STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH) ".0"
         END
     END
     BLOCK "VarFileInfo"
