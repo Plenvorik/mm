@@ -13,7 +13,6 @@
 #define ID_TRAY_ICON 1
 #define ID_TRAY_EXIT 1001
 #define ID_TRAY_PAUSE 1002
-#define ID_TRAY_AUTOSTART 1003
 
 // Configuration structure
 struct Config {
@@ -37,8 +36,6 @@ void ShowContextMenu();
 void MoveMouse();
 bool ParseCommandLine(LPSTR cmdLine, Config& config);
 void ShowHelp();
-bool IsAutostartEnabled();
-void SetAutostart(bool enable);
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     // Parse command line parameters
@@ -240,9 +237,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     Shell_NotifyIcon(NIM_MODIFY, &g_nid);
                     break;
                 }
-                case ID_TRAY_AUTOSTART:
-                    SetAutostart(!IsAutostartEnabled());
-                    break;
                 case ID_TRAY_EXIT:
                     g_isRunning = false;
                     PostQuitMessage(0);
@@ -298,12 +292,6 @@ void ShowContextMenu() {
     AppendMenu(hMenu, MF_STRING, ID_TRAY_PAUSE, g_isPaused.load() ? "Resume" : "Pause");
     AppendMenu(hMenu, MF_SEPARATOR, 0, nullptr);
     
-    // Autostart option
-    bool autostartEnabled = IsAutostartEnabled();
-    AppendMenu(hMenu, MF_STRING, ID_TRAY_AUTOSTART, 
-               autostartEnabled ? "Disable Autostart" : "Enable Autostart");
-    
-    AppendMenu(hMenu, MF_SEPARATOR, 0, nullptr);
     AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, "Exit");
     
     SetForegroundWindow(g_hwnd);
@@ -311,60 +299,10 @@ void ShowContextMenu() {
     DestroyMenu(hMenu);
 }
 
-bool IsAutostartEnabled() {
-    HKEY hKey;
-    if (RegOpenKeyEx(HKEY_CURRENT_USER, 
-                     "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-                     0, KEY_READ, &hKey) != ERROR_SUCCESS) {
-        return false;
-    }
-    
-    DWORD dwType, dwSize = 0;
-    bool exists = (RegQueryValueEx(hKey, "MouseMover", nullptr, &dwType, nullptr, &dwSize) == ERROR_SUCCESS);
-    
-    RegCloseKey(hKey);
-    return exists;
-}
-
-void SetAutostart(bool enable) {
-    HKEY hKey;
-    if (RegOpenKeyEx(HKEY_CURRENT_USER,
-                     "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-                     0, KEY_SET_VALUE, &hKey) != ERROR_SUCCESS) {
-        MessageBox(g_hwnd, "Failed to access registry", "Error", MB_OK | MB_ICONERROR);
-        return;
-    }
-    
-    if (enable) {
-        // Get current executable path
-        char exePath[MAX_PATH];
-        DWORD pathLength = GetModuleFileName(nullptr, exePath, MAX_PATH);
-        if (pathLength == 0 || pathLength == MAX_PATH) {
-            RegCloseKey(hKey);
-            return;
-        }
-        
-        // Set registry value
-        if (RegSetValueEx(hKey, "MouseMover", 0, REG_SZ, 
-                          (BYTE*)exePath, strlen(exePath) + 1) == ERROR_SUCCESS) {
-            MessageBox(g_hwnd, "Autostart enabled successfully", "Mouse Mover", MB_OK | MB_ICONINFORMATION);
-        } else {
-            MessageBox(g_hwnd, "Failed to enable autostart", "Error", MB_OK | MB_ICONERROR);
-        }
-    } else {
-        // Remove registry value
-        if (RegDeleteValue(hKey, "MouseMover") == ERROR_SUCCESS) {
-            MessageBox(g_hwnd, "Autostart disabled successfully", "Mouse Mover", MB_OK | MB_ICONINFORMATION);
-        } else {
-            MessageBox(g_hwnd, "Failed to disable autostart", "Error", MB_OK | MB_ICONERROR);
-        }
-    }
-    
-    RegCloseKey(hKey);
-}
-
 void MoveMouse() {
-    static int direction = 5;
+    static int movePattern = 0;  // 0=horizontal, 1=vertical, 2=diagonal
+    static int directionX = 1;
+    static int directionY = 1;
     static POINT lastUserPos = {-1, -1};
     static auto lastUserActivity = std::chrono::steady_clock::now();
     static bool userWasActive = false;
@@ -391,17 +329,53 @@ void MoveMouse() {
         userWasActive = false;
     }
     
-    // Move mouse by configured distance
-    POINT newPos = {currentPos.x + (direction * g_config.distance), currentPos.y};
+    // Prepare SendInput structure
+    INPUT input = {};
+    input.type = INPUT_MOUSE;
+    input.mi.dwFlags = MOUSEEVENTF_MOVE;
     
-    // Simple boundary check
-    if (newPos.x < 10 || newPos.x > GetSystemMetrics(SM_CXSCREEN) - 10) {
-        direction = -direction;
-        newPos.x = currentPos.x + (direction * g_config.distance);
-    } else {
-        // Only alternate direction if we didn't hit boundary
-        direction = -direction;
+    // Calculate movement based on pattern
+    switch (movePattern) {
+        case 0:  // Horizontal movement
+            input.mi.dx = directionX * g_config.distance;
+            input.mi.dy = 0;
+            break;
+        case 1:  // Vertical movement
+            input.mi.dx = 0;
+            input.mi.dy = directionY * g_config.distance;
+            break;
+        case 2:  // Diagonal movement
+            input.mi.dx = directionX * g_config.distance;
+            input.mi.dy = directionY * g_config.distance;
+            break;
     }
     
-    SetCursorPos(newPos.x, newPos.y);
+    // Boundary checks and direction changes
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    
+    if (currentPos.x + input.mi.dx < 10 || currentPos.x + input.mi.dx > screenWidth - 10) {
+        directionX = -directionX;
+        input.mi.dx = directionX * g_config.distance;
+    }
+    
+    if (currentPos.y + input.mi.dy < 10 || currentPos.y + input.mi.dy > screenHeight - 10) {
+        directionY = -directionY;
+        input.mi.dy = directionY * g_config.distance;
+    }
+    
+    // Send the input
+    SendInput(1, &input, sizeof(INPUT));
+    
+    // Update last position after movement
+    GetCursorPos(&lastUserPos);
+    
+    // Cycle through movement patterns
+    movePattern = (movePattern + 1) % 3;
+    
+    // Change directions occasionally for more natural movement
+    if (movePattern == 0) {
+        directionX = -directionX;
+        directionY = -directionY;
+    }
 }
