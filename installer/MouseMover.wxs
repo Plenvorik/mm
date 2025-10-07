@@ -71,7 +71,7 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="MouseMoverExecutable" Guid="*">
         <File Id="MouseMoverEXE" 
-              Source="..\bin\Release\mm.exe" 
+              Source="..\bin\$(var.Configuration)\mm.exe" 
               KeyPath="yes" 
               Checksum="yes">
           <Shortcut Id="MouseMoverShortcut"
