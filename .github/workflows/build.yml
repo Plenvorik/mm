@@ -29,10 +29,10 @@ jobs:
       run: nuget restore mm.sln
 
     - name: Build Solution (Debug)
-      run: msbuild mm.sln /p:Configuration=Debug /p:Platform=x64 /p:SolutionDir="${{ github.workspace }}\" /v:minimal
+      run: msbuild mm.sln /p:Configuration=Debug /p:Platform=x64 /v:minimal
 
     - name: Build Solution (Release)
-      run: msbuild mm.sln /p:Configuration=Release /p:Platform=x64 /p:SolutionDir="${{ github.workspace }}\" /v:minimal
+      run: msbuild mm.sln /p:Configuration=Release /p:Platform=x64 /v:minimal
 
     - name: Upload Application Artifacts
       uses: actions/upload-artifact@v4
