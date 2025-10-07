@@ -1,31 +1,21 @@
 # Mouse Mover (mm.exe)
 
-## 💡 Motivation
+A lightweight Windows utility that prevents screen lock by automatically moving the mouse cursor. Runs silently in the system tray with minimal resource usage.
 
-This project was inspired by [domax/mouse-mover](https://github.com/domax/mouse-mover), a Java-based utility that prevents screen lock by automatically moving the mouse cursor. While the original project works well, I noticed some drawbacks that motivated me to create this C++ alternative:
+## Features
 
-**Issues with the Java version:**
-- Always keeps a **console window open** (distracting)
-- **High memory usage** due to JVM overhead (~100MB+)
-- Requires **Java Runtime Environment** installation
-- Slower startup time due to JVM initialization
-
-**My improvements:**
-- **Native Windows application** with no visible windows
-- **Minimal memory footprint** (~1-2MB runtime usage)
-- **No dependencies** - single executable, no JRE required
-- **System tray integration** with context menu controls
-- **Embedded resources** - no external files needed
-- **Faster startup** and lower CPU usage
-
-**Developer Background:**
-I primarily come from the **Linux world** and prefer developing in **WSL**, so this is one of my first native Windows applications. If you spot any Windows-specific issues or improvements, I'd greatly appreciate your feedback and contributions!
+- **Native Windows application** - No console window, runs in system tray
+- **Minimal footprint** - Only ~1-2MB memory usage
+- **Zero dependencies** - Single standalone executable
+- **Smart detection** - Pauses when user is active
+- **Easy controls** - Right-click tray icon for options
+- **Configurable** - Adjust timing and movement distance
 
 ![Mouse Mover Icon](assets/mouse-animal.ico)
 
 ---
 
-## 🎯 For Users
+## 🎯 Usage
 
 ### Quick Start
 1. **Download** the latest `mm.exe` from releases
@@ -33,29 +23,15 @@ I primarily come from the **Linux world** and prefer developing in **WSL**, so t
 3. **Right-click** the mouse icon in system tray for options
 4. **Double-click** the tray icon to quickly pause/resume
 
-### Features
-- **🖱️ Smart Movement** - Moves cursor 5px every 5 seconds
-- **⏸️ Auto-Pause** - Detects user activity and pauses for 30 seconds
-- **👻 Hidden Operation** - No windows, runs silently in background
-- **🎛️ System Tray Controls** - Right-click for Pause/Resume/Autostart/Exit
-- **🔒 Secure** - No network access, no data collection, fully offline
-- **💾 Lightweight** - Only 2.3MB, minimal memory usage (~1-2MB runtime)
+### Requirements
 
-### Comparison with Java Version
+- Windows 10 or Windows 11
+- No additional runtime dependencies
 
-| Feature | Java Version | This C++ Version |
-|---------|-------------|------------------|
-| Runtime Memory | ~100MB+ (JVM) | ~1-2MB |
-| Dependencies | Java 8+ Required | None (standalone) |
-| Startup Time | Slow (JVM init) | Instant |
-| Console Window | Always visible | Hidden (system tray) |
-| File Size | ~10MB+ | 2.3MB |
-| User Interface | Console only | System tray + context menu |
-
-### Configuration
-- **Movement**: 5 pixels horizontal every 5 seconds (configurable)
+### Default Behavior
+- **Movement**: 5 pixels every 5 seconds
 - **User Detection**: Pauses 30 seconds after keyboard/mouse activity
-- **Autostart**: Optional Windows startup integration via registry
+- **Movement Pattern**: Alternates between horizontal, vertical, and diagonal
 
 ### Command Line Options
 ```cmd
@@ -99,12 +75,11 @@ mm/
 
 ### Development Environment
 
-This project uses **Microsoft Visual Studio** for native Windows development:
-- **Native MSVC compiler** - Better Windows compatibility, fewer false positives
-- **Visual Studio IDE** - Full debugging, IntelliSense, and project management
-- **Static linking** - No runtime dependencies
-- **Unicode support** - Proper Windows text handling
-- **Manifest integration** - Explicit privilege declaration
+Built with Visual Studio 2022 and the Windows SDK:
+- **MSVC compiler** for native Windows binaries
+- **Static linking** ensures no runtime dependencies
+- **Full Unicode support** for proper Windows text handling
+- **Embedded manifest** for Windows compatibility
 
 ### Prerequisites
 - **Visual Studio 2022** (Community/Professional/Enterprise)
@@ -126,13 +101,13 @@ msbuild mm.sln /p:Configuration=Release /p:Platform=x64
 - **Debug**: Full debug symbols, unoptimized, console output
 - **Release**: Optimized, static runtime linking, minimal size
 
-### Technical Architecture
+### Technical Details
 - **Language**: C++17 with Win32 API
 - **Threading**: std::thread for mouse movement
 - **Resources**: Icon embedded via Windows Resource System
-- **Memory**: ~1-2MB runtime usage (vs ~100MB+ Java)
+- **Memory**: ~1-2MB runtime usage
 - **Dependencies**: Statically linked, no runtime dependencies
-- **Build**: Cross-compiled from WSL to Windows x64
+- **Build System**: Visual Studio 2022 with MSVC compiler
 
 ### Key Components
 1. **System Tray Integration** - Custom icon with context menu
@@ -148,14 +123,6 @@ msbuild mm.sln /p:Configuration=Release /p:Platform=x64
 - **Resource cleanup** - Proper Windows handle management
 - **Error handling** - Comprehensive error checking
 
-### Windows Development Notes
-
-Since I'm primarily a Linux developer, I welcome feedback on:
-- **Win32 API usage** - Are there better/more modern approaches?
-- **Windows conventions** - File paths, registry usage, etc.
-- **Security considerations** - Windows-specific security best practices
-- **Performance optimizations** - Windows-specific improvements
-- **Compatibility** - Testing across Windows versions (10, 11)
 
 ### Contributing
 1. Fork repository and create feature branch
@@ -164,23 +131,19 @@ Since I'm primarily a Linux developer, I welcome feedback on:
 4. Build successful with no warnings
 5. Submit pull request with clear description
 
-**Special thanks to Linux/Windows cross-platform developers for guidance!**
 
 ### Release Process
-1. Update version in `Makefile` and `resource.rc`
-2. Build release: `make clean && make all`
-3. Test executable thoroughly on multiple Windows versions
-4. Create GitHub release with `bin/mm.exe`
+1. Update version in `src/resource.rc` (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+2. Build release: `msbuild mm.sln /p:Configuration=Release /p:Platform=x64`
+3. Test executable on Windows 10/11
+4. Create GitHub release with `bin/Release/mm.exe`
 
 ---
 
-## 🙏 Acknowledgments
+## License
 
-- **[domax/mouse-mover](https://github.com/domax/mouse-mover)** - Original inspiration and concept
-- **WSL Team** - Making cross-platform development seamless
-- **MinGW-w64 Project** - Excellent cross-compilation toolchain
-- **Windows API Documentation** - Comprehensive Win32 reference
+This project is released under the MIT License. See LICENSE file for details.
 
----
+## Credits
 
-**Built with WSL cross-compilation | Pure Windows API | Linux developer's first Windows app**
+Inspired by [domax/mouse-mover](https://github.com/domax/mouse-mover).
