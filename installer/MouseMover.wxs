@@ -22,23 +22,20 @@
     <MediaTemplate EmbedCab="yes" />
 
     <!-- Features -->
-    <Feature Id="ProductFeature" Title="Mouse Mover" Level="1">
+    <Feature Id="ProductFeature" Title="Mouse Mover" Level="1" Description="Core application files">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="ApplicationShortcut" />
     </Feature>
     
-    <!-- Optional Autostart Feature -->
-    <Feature Id="AutostartFeature" 
-             Title="Start with Windows" 
-             Description="Automatically start Mouse Mover when Windows starts"
-             Level="1"
-             Display="expand">
+    <!-- Autostart as separate selectable feature, default enabled -->
+    <Feature Id="AutostartFeature" Title="Autostart with Windows" Level="1" Description="Automatically start Mouse Mover when Windows starts">
       <ComponentRef Id="AutostartComponent" />
     </Feature>
 
-    <!-- UI -->
-    <UIRef Id="WixUI_FeatureTree" />
-    <UIRef Id="WixUI_ErrorProgressText" />
+    <!-- Feature selection UI -->
+    <UI>
+      <UIRef Id="WixUI_FeatureTree" />
+    </UI>
     
     <!-- License -->
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />

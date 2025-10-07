@@ -9,6 +9,7 @@
     <OutputName>MouseMover</OutputName>
     <OutputType>Package</OutputType>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <DefineSolutionProperties>false</DefineSolutionProperties>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
@@ -28,6 +29,13 @@
   
   <ItemGroup>
     <Content Include="License.rtf" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
   </ItemGroup>
   
   <!-- Reference WiX targets -->
