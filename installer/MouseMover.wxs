@@ -70,9 +70,14 @@
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="MouseMoverExecutable" Guid="*">
+        <RegistryValue Root="HKCU" 
+                       Key="Software\Horizonia Precision Tech\Mouse Mover" 
+                       Name="InstallPath" 
+                       Value="[INSTALLFOLDER]" 
+                       Type="string" 
+                       KeyPath="yes" />
         <File Id="MouseMoverEXE" 
               Source="..\bin\$(var.Configuration)\mm.exe" 
-              KeyPath="yes" 
               Checksum="yes">
           <Shortcut Id="MouseMoverShortcut"
                     Directory="ApplicationProgramsFolder"
@@ -81,12 +86,19 @@
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="MouseMoverIcon" />
         </File>
+        <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
       </Component>
     </ComponentGroup>
     
     <!-- Start Menu Shortcut Component -->
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ApplicationShortcut" Guid="*">
+        <RegistryValue Root="HKCU" 
+                       Key="Software\Horizonia Precision Tech\Mouse Mover" 
+                       Name="StartMenuShortcut" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes"/>
         <Shortcut Id="ApplicationStartMenuShortcut"
                   Name="Mouse Mover"
                   Description="Prevents screen lock by moving mouse cursor"
@@ -94,12 +106,6 @@
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="MouseMoverIcon"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-        <RegistryValue Root="HKCU" 
-                       Key="Software\Microsoft\MouseMover" 
-                       Name="installed" 
-                       Type="integer" 
-                       Value="1" 
-                       KeyPath="yes"/>
       </Component>
     </DirectoryRef>
     
