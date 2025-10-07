@@ -30,11 +30,8 @@ jobs:
       shell: bash
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-    - name: Build Application (Release)
-      run: msbuild mm.vcxproj /p:Configuration=Release /p:Platform=x64 /v:minimal
-
-    - name: Build Installer
-      run: msbuild installer\MouseMover.wixproj /p:Configuration=Release /p:Platform=x64 /v:minimal
+    - name: Build Solution (Release)
+      run: msbuild mm.sln /p:Configuration=Release /p:Platform=x64 /v:minimal
 
     - name: Rename artifacts with version
       shell: bash
