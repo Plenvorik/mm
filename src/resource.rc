@@ -2,7 +2,10 @@
 #include "resource.h"
 
 // Icon resource
-IDI_MAIN_ICON ICON "../assets/mouse-animal.ico"
+IDI_MAIN_ICON ICON "..\\assets\\mouse-animal.ico"
+
+// Manifest
+1 RT_MANIFEST "mm.manifest"
 
 // Macro to convert numbers to strings
 #define STRINGIZE2(x) #x
@@ -16,7 +19,7 @@ IDI_MAIN_ICON ICON "../assets/mouse-animal.ico"
 #define VERSION_MINOR 0
 #endif
 #ifndef VERSION_PATCH
-#define VERSION_PATCH 0
+#define VERSION_PATCH 3
 #endif
 #ifndef VERSION_BUILD
 #define VERSION_BUILD 0
@@ -36,14 +39,15 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "Open Source"
-            VALUE "FileDescription", "Mouse Mover - Prevents screen lock"
+            VALUE "CompanyName", "Horizonia Precision Tech"
+            VALUE "FileDescription", "Mouse Mover - Prevents Screen Lock"
             VALUE "FileVersion", STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH) ".0"
             VALUE "InternalName", "mm.exe"
-            VALUE "LegalCopyright", "MIT License"
+            VALUE "LegalCopyright", "© 2025 Horizonia Precision Tech - MIT License"
             VALUE "OriginalFilename", "mm.exe"
             VALUE "ProductName", "Mouse Mover"
             VALUE "ProductVersion", STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH) ".0"
+            VALUE "Comments", "Lightweight C++ utility to prevent screen locks and maintain active status"
         END
     END
     BLOCK "VarFileInfo"

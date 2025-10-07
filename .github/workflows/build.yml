@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup WiX Toolset
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe" -OutFile "wix311.exe"
+        Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet" -Wait
+        
+    - name: Add WiX to PATH
+      run: echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: Restore NuGet packages
+      run: nuget restore mm.sln
+
+    - name: Build Application (Debug)
+      run: msbuild mm.vcxproj /p:Configuration=Debug /p:Platform=x64 /v:minimal
+
+    - name: Build Application (Release)
+      run: msbuild mm.vcxproj /p:Configuration=Release /p:Platform=x64 /v:minimal
+
+    - name: Build Installer
+      run: msbuild installer\MouseMover.wixproj /p:Configuration=Release /p:Platform=x64 /v:minimal
+
+    - name: Upload Application Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: MouseMover-Application
+        path: |
+          bin/Release/mm.exe
+          bin/Debug/mm.exe
+
+    - name: Upload Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MouseMover-Installer
+        path: installer/bin/Release/MouseMover.msi

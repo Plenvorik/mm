@@ -34,41 +34,36 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void CreateTrayIcon();
 void ShowContextMenu();
 void MoveMouse();
-bool ParseCommandLine(const char* cmdLine, Config& config);
+bool ParseCommandLine(LPSTR cmdLine, Config& config);
 void ShowHelp();
 
-int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     // Parse command line parameters
-    // Convert wide string to narrow string for parsing
-    int size = WideCharToMultiByte(CP_UTF8, 0, lpCmdLine, -1, nullptr, 0, nullptr, nullptr);
-    std::string cmdLineStr(size - 1, 0);
-    WideCharToMultiByte(CP_UTF8, 0, lpCmdLine, -1, &cmdLineStr[0], size, nullptr, nullptr);
-    
-    if (!ParseCommandLine(cmdLineStr.c_str(), g_config)) {
+    if (!ParseCommandLine(lpCmdLine, g_config)) {
         return 1; // Help was shown or error occurred
     }
     
     // Register window class
-    const wchar_t* className = L"MouseMoverClass";
+    const char* className = "MouseMoverClass";
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = className;
     
-    if (!RegisterClassW(&wc)) {
-        MessageBoxW(nullptr, L"Failed to register window class", L"Error", MB_OK | MB_ICONERROR);
+    if (!RegisterClass(&wc)) {
+        MessageBox(nullptr, "Failed to register window class", "Error", MB_OK | MB_ICONERROR);
         return 1;
     }
     
     // Create message-only window (invisible)
-    g_hwnd = CreateWindowW(
-        className, L"Mouse Mover",
+    g_hwnd = CreateWindow(
+        className, "Mouse Mover",
         0, 0, 0, 0, 0,
         HWND_MESSAGE, nullptr, hInstance, nullptr
     );
     
     if (!g_hwnd) {
-        MessageBoxW(nullptr, L"Failed to create window", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(nullptr, "Failed to create window", "Error", MB_OK | MB_ICONERROR);
         return 1;
     }
     
@@ -108,7 +103,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     return 0;
 }
 
-bool ParseCommandLine(const char* cmdLine, Config& config) {
+bool ParseCommandLine(LPSTR cmdLine, Config& config) {
     if (!cmdLine || strlen(cmdLine) == 0) {
         return true; // No parameters, use defaults
     }
@@ -130,15 +125,15 @@ bool ParseCommandLine(const char* cmdLine, Config& config) {
             try {
                 int value = std::stoi(token);
                 if (value < 1 || value > 3600) {
-                    MessageBoxW(nullptr, L"Short-delay must be between 1 and 3600 seconds", L"Parameter Error", MB_OK | MB_ICONERROR);
+                    MessageBox(nullptr, "Short-delay must be between 1 and 3600 seconds", "Parameter Error", MB_OK | MB_ICONERROR);
                     return false;
                 }
                 config.shortDelay = value;
-            } catch (const std::invalid_argument&) {
-                MessageBoxW(nullptr, L"Invalid short-delay parameter: not a number", L"Parameter Error", MB_OK | MB_ICONERROR);
+            } catch (const std::invalid_argument& e) {
+                MessageBox(nullptr, "Invalid short-delay parameter: not a number", "Parameter Error", MB_OK | MB_ICONERROR);
                 return false;
-            } catch (const std::out_of_range&) {
-                MessageBoxW(nullptr, L"Short-delay parameter out of range", L"Parameter Error", MB_OK | MB_ICONERROR);
+            } catch (const std::out_of_range& e) {
+                MessageBox(nullptr, "Short-delay parameter out of range", "Parameter Error", MB_OK | MB_ICONERROR);
                 return false;
             }
         }
@@ -146,15 +141,15 @@ bool ParseCommandLine(const char* cmdLine, Config& config) {
             try {
                 int value = std::stoi(token);
                 if (value < 0 || value > 7200) {
-                    MessageBoxW(nullptr, L"Long-delay must be between 0 and 7200 seconds", L"Parameter Error", MB_OK | MB_ICONERROR);
+                    MessageBox(nullptr, "Long-delay must be between 0 and 7200 seconds", "Parameter Error", MB_OK | MB_ICONERROR);
                     return false;
                 }
                 config.longDelay = value;
-            } catch (const std::invalid_argument&) {
-                MessageBoxW(nullptr, L"Invalid long-delay parameter: not a number", L"Parameter Error", MB_OK | MB_ICONERROR);
+            } catch (const std::invalid_argument& e) {
+                MessageBox(nullptr, "Invalid long-delay parameter: not a number", "Parameter Error", MB_OK | MB_ICONERROR);
                 return false;
-            } catch (const std::out_of_range&) {
-                MessageBoxW(nullptr, L"Long-delay parameter out of range", L"Parameter Error", MB_OK | MB_ICONERROR);
+            } catch (const std::out_of_range& e) {
+                MessageBox(nullptr, "Long-delay parameter out of range", "Parameter Error", MB_OK | MB_ICONERROR);
                 return false;
             }
         }
@@ -162,15 +157,15 @@ bool ParseCommandLine(const char* cmdLine, Config& config) {
             try {
                 int value = std::stoi(token);
                 if (value < 1 || value > 100) {
-                    MessageBoxW(nullptr, L"Distance must be between 1 and 100 pixels", L"Parameter Error", MB_OK | MB_ICONERROR);
+                    MessageBox(nullptr, "Distance must be between 1 and 100 pixels", "Parameter Error", MB_OK | MB_ICONERROR);
                     return false;
                 }
                 config.distance = value;
-            } catch (const std::invalid_argument&) {
-                MessageBoxW(nullptr, L"Invalid distance parameter: not a number", L"Parameter Error", MB_OK | MB_ICONERROR);
+            } catch (const std::invalid_argument& e) {
+                MessageBox(nullptr, "Invalid distance parameter: not a number", "Parameter Error", MB_OK | MB_ICONERROR);
                 return false;
-            } catch (const std::out_of_range&) {
-                MessageBoxW(nullptr, L"Distance parameter out of range", L"Parameter Error", MB_OK | MB_ICONERROR);
+            } catch (const std::out_of_range& e) {
+                MessageBox(nullptr, "Distance parameter out of range", "Parameter Error", MB_OK | MB_ICONERROR);
                 return false;
             }
         }
@@ -178,22 +173,22 @@ bool ParseCommandLine(const char* cmdLine, Config& config) {
     
     // Enhanced parameter validation
     if (config.shortDelay < 1 || config.shortDelay > 3600) {
-        MessageBoxW(nullptr, L"Short delay must be between 1 and 3600 seconds", L"Parameter Error", MB_OK | MB_ICONERROR);
+        MessageBox(nullptr, "Short delay must be between 1 and 3600 seconds", "Parameter Error", MB_OK | MB_ICONERROR);
         return false;
     }
     
     if (config.longDelay < 1 || config.longDelay > 7200) {
-        MessageBoxW(nullptr, L"Long delay must be between 1 and 7200 seconds", L"Parameter Error", MB_OK | MB_ICONERROR);
+        MessageBox(nullptr, "Long delay must be between 1 and 7200 seconds", "Parameter Error", MB_OK | MB_ICONERROR);
         return false;
     }
     
     if (config.shortDelay > config.longDelay) {
-        MessageBoxW(nullptr, L"Short delay must be less than or equal to long delay", L"Parameter Error", MB_OK | MB_ICONERROR);
+        MessageBox(nullptr, "Short delay must be less than or equal to long delay", "Parameter Error", MB_OK | MB_ICONERROR);
         return false;
     }
     
     if (config.distance == 0 || abs(config.distance) > 100) {
-        MessageBoxW(nullptr, L"Distance must be between -100 and 100 pixels (non-zero)", L"Parameter Error", MB_OK | MB_ICONERROR);
+        MessageBox(nullptr, "Distance must be between -100 and 100 pixels (non-zero)", "Parameter Error", MB_OK | MB_ICONERROR);
         return false;
     }
     
@@ -215,11 +210,7 @@ void ShowHelp() {
         "The application runs in the system tray.\n"
         "Right-click the tray icon for options.";
     
-    // Convert to wide string for MessageBox
-    int size = MultiByteToWideChar(CP_UTF8, 0, helpText.c_str(), -1, nullptr, 0);
-    std::wstring wHelpText(size - 1, 0);
-    MultiByteToWideChar(CP_UTF8, 0, helpText.c_str(), -1, &wHelpText[0], size);
-    MessageBoxW(nullptr, wHelpText.c_str(), L"Mouse Mover Help", MB_OK | MB_ICONINFORMATION);
+    MessageBox(nullptr, helpText.c_str(), "Mouse Mover Help", MB_OK | MB_ICONINFORMATION);
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -230,8 +221,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             } else if (lParam == WM_LBUTTONDBLCLK) {
                 g_isPaused = !g_isPaused.load();
                 // Update tooltip
-                const wchar_t* status = g_isPaused.load() ? L"Mouse Mover - Paused" : L"Mouse Mover - Active";
-                wcsncpy_s(g_nid.szTip, sizeof(g_nid.szTip)/sizeof(wchar_t), status, _TRUNCATE);
+                const char* status = g_isPaused.load() ? "Mouse Mover - Paused" : "Mouse Mover - Active";
+                strncpy_s(g_nid.szTip, sizeof(g_nid.szTip), status, _TRUNCATE);
                 Shell_NotifyIcon(NIM_MODIFY, &g_nid);
             }
             break;
@@ -241,8 +232,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 case ID_TRAY_PAUSE: {
                     g_isPaused = !g_isPaused.load();
                     // Update tooltip
-                    const wchar_t* status = g_isPaused.load() ? L"Mouse Mover - Paused" : L"Mouse Mover - Active";
-                    wcsncpy_s(g_nid.szTip, sizeof(g_nid.szTip)/sizeof(wchar_t), status, _TRUNCATE);
+                    const char* status = g_isPaused.load() ? "Mouse Mover - Paused" : "Mouse Mover - Active";
+                    strncpy_s(g_nid.szTip, sizeof(g_nid.szTip), status, _TRUNCATE);
                     Shell_NotifyIcon(NIM_MODIFY, &g_nid);
                     break;
                 }
@@ -280,14 +271,14 @@ void CreateTrayIcon() {
     }
     
     // Create tooltip with current settings
-    int result = swprintf_s(g_nid.szTip, sizeof(g_nid.szTip)/sizeof(wchar_t), L"Mouse Mover - Active (Move: %ds, Wait: %ds)", 
+    int result = snprintf(g_nid.szTip, sizeof(g_nid.szTip), "Mouse Mover - Active (Move: %ds, Wait: %ds)", 
                          g_config.shortDelay, g_config.longDelay);
-    if (result < 0) {
-        wcscpy_s(g_nid.szTip, sizeof(g_nid.szTip)/sizeof(wchar_t), L"Mouse Mover - Active");
+    if (result < 0 || result >= sizeof(g_nid.szTip)) {
+        strncpy_s(g_nid.szTip, sizeof(g_nid.szTip), "Mouse Mover - Active", _TRUNCATE);
     }
     
     if (!Shell_NotifyIcon(NIM_ADD, &g_nid)) {
-        MessageBoxW(nullptr, L"Failed to create system tray icon.", L"Error", MB_ICONERROR);
+        MessageBox(nullptr, "Failed to create system tray icon.", "Error", MB_ICONERROR);
     }
 }
 
@@ -298,10 +289,10 @@ void ShowContextMenu() {
     HMENU hMenu = CreatePopupMenu();
     
     // Pause/Resume
-    AppendMenuW(hMenu, MF_STRING, ID_TRAY_PAUSE, g_isPaused.load() ? L"Resume" : L"Pause");
+    AppendMenu(hMenu, MF_STRING, ID_TRAY_PAUSE, g_isPaused.load() ? "Resume" : "Pause");
     AppendMenu(hMenu, MF_SEPARATOR, 0, nullptr);
     
-    AppendMenuW(hMenu, MF_STRING, ID_TRAY_EXIT, L"Exit");
+    AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, "Exit");
     
     SetForegroundWindow(g_hwnd);
     TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, g_hwnd, nullptr);

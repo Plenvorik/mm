@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" 
+           Name="Mouse Mover" 
+           Language="1033" 
+           Version="1.0.3.0" 
+           Manufacturer="Horizonia Precision Tech" 
+           UpgradeCode="12345678-1234-1234-1234-123456789012">
+    
+    <Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perUser"
+             Description="Mouse Mover - Prevents Screen Lock"
+             Comments="Lightweight C++ utility to prevent screen locks"
+             Manufacturer="Horizonia Precision Tech"
+             Keywords="mouse,mover,screen,lock,teams"/>
+
+    <!-- Ensure only one version is installed -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+    <!-- Media and Cabinet -->
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Features -->
+    <Feature Id="ProductFeature" Title="Mouse Mover" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcut" />
+    </Feature>
+    
+    <!-- Optional Autostart Feature -->
+    <Feature Id="AutostartFeature" 
+             Title="Start with Windows" 
+             Description="Automatically start Mouse Mover when Windows starts"
+             Level="1"
+             Display="expand">
+      <ComponentRef Id="AutostartComponent" />
+    </Feature>
+
+    <!-- UI -->
+    <UIRef Id="WixUI_FeatureTree" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    
+    <!-- License -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    
+    <!-- Icons -->
+    <Icon Id="MouseMoverIcon" SourceFile="$(var.SolutionDir)assets\mouse-animal.ico" />
+    <Property Id="ARPPRODUCTICON" Value="MouseMoverIcon" />
+    
+    <!-- Add/Remove Programs -->
+    <Property Id="ARPHELPLINK" Value="https://github.com/horizonia-tech/mouse-mover" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/horizonia-tech/mouse-mover" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+  </Product>
+
+  <!-- Directory Structure -->
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="ProgramsFolder" Name="Programs">
+          <Directory Id="INSTALLFOLDER" Name="Mouse Mover" />
+        </Directory>
+      </Directory>
+      
+      <!-- Start Menu -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Mouse Mover"/>
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <!-- Components -->
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="MouseMoverExecutable" Guid="*">
+        <File Id="MouseMoverEXE" 
+              Source="$(var.SolutionDir)bin\Release\mm.exe" 
+              KeyPath="yes" 
+              Checksum="yes">
+          <Shortcut Id="MouseMoverShortcut"
+                    Directory="ApplicationProgramsFolder"
+                    Name="Mouse Mover"
+                    Description="Prevents screen lock by moving mouse cursor"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="MouseMoverIcon" />
+        </File>
+      </Component>
+    </ComponentGroup>
+    
+    <!-- Start Menu Shortcut Component -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="*">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Mouse Mover"
+                  Description="Prevents screen lock by moving mouse cursor"
+                  Target="[INSTALLFOLDER]mm.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="MouseMoverIcon"/>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" 
+                       Key="Software\Microsoft\MouseMover" 
+                       Name="installed" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Autostart Registry Component -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="AutostartComponent" Guid="*">
+        <RegistryValue Root="HKCU"
+                       Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                       Name="MouseMover"
+                       Type="string"
+                       Value="&quot;[INSTALLFOLDER]mm.exe&quot;"
+                       KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
