@@ -77,6 +77,9 @@ Makefile.bak
 *.orig
 *.backup
 
+# AI Helpers
+CLAUDE.md
+
 # Documentation build
 docs/_build/
 site/

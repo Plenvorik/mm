@@ -79,56 +79,52 @@ mm.exe [options]
 ```
 mm/
 ├── src/                    # Source code
-│   ├── main.cpp           # Main application (single file)
-│   ├── resource.rc        # Windows resources & icon
-│   └── resource.h         # Resource definitions
+│   ├── main.cpp           # Main application
+│   ├── resource.rc        # Windows resources & version info
+│   ├── resource.h         # Resource definitions
+│   └── mm.manifest        # Application manifest
 ├── bin/
-│   └── mm.exe             # Compiled executable (2.3MB)
+│   ├── Debug/             # Debug builds
+│   └── Release/           # Release builds
 ├── assets/
-│   └── mouse-animal.ico   # Icon asset for build
-├── scripts/               # Build scripts
-│   ├── setup-wsl.sh      # WSL environment setup
-│   └── build-wsl.sh      # Build script
-├── Makefile              # Build system
+│   └── mouse-animal.ico   # Application icon
+├── legacy/                # Previous MinGW-based code
+│   ├── main.cpp           # Legacy source
+│   └── assets/            # Legacy assets
+├── mm.sln                 # Visual Studio solution
+├── mm.vcxproj            # Visual Studio project
 ├── CLAUDE.md             # Development instructions
 └── README.md             # This file
 ```
 
-### Why WSL Cross-Compilation?
+### Development Environment
 
-As a Linux developer, I prefer the WSL environment for development:
-- **Familiar toolchain** - GCC, Make, shell scripts
-- **Better terminal** experience than Windows Command Prompt
-- **Cross-compilation** - develop on Linux, target Windows
-- **Package management** - easy MinGW-w64 installation
-- **Consistent build environment** across different machines
+This project uses **Microsoft Visual Studio** for native Windows development:
+- **Native MSVC compiler** - Better Windows compatibility, fewer false positives
+- **Visual Studio IDE** - Full debugging, IntelliSense, and project management
+- **Static linking** - No runtime dependencies
+- **Unicode support** - Proper Windows text handling
+- **Manifest integration** - Explicit privilege declaration
 
 ### Prerequisites
-- **WSL2** with Ubuntu 24.04+
-- **MinGW-w64** cross-compiler: `x86_64-w64-mingw32-g++`
-- Setup: `./scripts/setup-wsl.sh`
+- **Visual Studio 2022** (Community/Professional/Enterprise)
+- **Windows 10/11 SDK**
+- **MSVC v143 toolset**
 
 ### Build Commands
-```bash
-make all        # Build mm.exe
-make clean      # Clean build artifacts
-make run        # Build and run
-make debug      # Debug build with -g -DDEBUG
-make info       # Show project information
+```cmd
+# In Visual Studio:
+Build > Build Solution     (Ctrl+Shift+B)
+Debug > Start Debugging    (F5)
+Build > Rebuild Solution   (Ctrl+Alt+F7)
+
+# Command line (Developer Command Prompt):
+msbuild mm.sln /p:Configuration=Release /p:Platform=x64
 ```
 
-### Manual Build Process
-```bash
-# Compile Windows resources
-x86_64-w64-mingw32-windres src/resource.rc -o build/resource.o
-
-# Compile application with static linking
-x86_64-w64-mingw32-g++ -std=c++17 -mwindows \
-    src/main.cpp build/resource.o \
-    -o bin/mm.exe \
-    -lgdi32 -luser32 -lshell32 -ladvapi32 \
-    -static-libgcc -static-libstdc++
-```
+### Build Configurations
+- **Debug**: Full debug symbols, unoptimized, console output
+- **Release**: Optimized, static runtime linking, minimal size
 
 ### Technical Architecture
 - **Language**: C++17 with Win32 API
