@@ -87,6 +87,7 @@
                     Icon="MouseMoverIcon" />
         </File>
         <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
+        <RemoveFile Id="RemoveProgramsFiles" Name="*" Directory="ProgramsFolder" On="uninstall" />
       </Component>
     </ComponentGroup>
     
