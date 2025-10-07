@@ -31,7 +31,7 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
     - name: Build Solution (Release)
-      run: msbuild mm.sln /p:Configuration=Release /p:Platform=x64 /v:minimal
+      run: msbuild mm.sln /p:Configuration=Release /p:Platform=x64 /p:SolutionDir="${{ github.workspace }}\" /v:minimal
 
     - name: Rename artifacts with version
       shell: bash
